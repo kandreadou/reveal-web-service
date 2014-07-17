@@ -62,6 +62,13 @@
             <artifactId>jackson-mapper-asl</artifactId>
             <version>1.9.13</version>
         </dependency>
+
+        <dependency>
+            <groupId>eu.socialsensor</groupId>
+            <artifactId>socialsensor-framework-client</artifactId>
+            <version>0.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>

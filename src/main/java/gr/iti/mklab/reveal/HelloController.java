@@ -1,17 +1,33 @@
 package gr.iti.mklab.reveal;
 
+import com.mongodb.DBObject;
+import eu.socialsensor.framework.client.dao.MediaItemDAO;
+import eu.socialsensor.framework.client.dao.impl.MediaItemDAOImpl;
+import eu.socialsensor.framework.common.domain.MediaItem;
+import gr.iti.mklab.reveal.mongo.MongoManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Controller
-@RequestMapping("reveal")
+@RequestMapping("reveal/mmapi")
 public class HelloController {
+
+    protected MediaItemDAO mediaDao;
+
+    protected MongoManager mgr = new MongoManager("127.0.0.1", "Linear", "MediaItems");
+
+    public HelloController(){
+        String mongoHost ="127.0.0.1";
+        try {
+            mediaDao = new MediaItemDAOImpl(mongoHost);
+        }catch(Exception ex){
+            //ignore
+        }
+    }
 
     @RequestMapping(method = RequestMethod.GET)
 	public String printWelcome(ModelMap model) {
@@ -24,6 +40,35 @@ public class HelloController {
     public Greeting greeting(@RequestParam(value="name", required=false, defaultValue="World") String name) {
         return new Greeting(5, "test");
     }
+
+    @RequestMapping(value = "/media",  method = RequestMethod.GET, produces="application/json")
+    @ResponseBody
+    public List<MediaItem> mediaItems(@RequestParam(value="name", required=false, defaultValue="World") String name) {
+        List<MediaItem> list = mediaDao.getLastMediaItems(10);
+        return list;
+    }
+
+    @RequestMapping(value = "/media/image/{id}",  method = RequestMethod.GET, produces="application/json")
+    @ResponseBody
+    public MediaItem mediaItemById(@PathVariable("id") String mediaItemId) {
+        MediaItem mi = mediaDao.getMediaItem(mediaItemId);
+        return mi;
+    }
+
+    @RequestMapping(value = "/media/image/search",  method = RequestMethod.GET, produces="application/json")
+    @ResponseBody
+    public List<MediaItem> mediaItemsSearch(
+            @RequestParam(value="date", required=false) long date) {
+        List<MediaItem> list = mediaDao.getLastMediaItems(50);
+        return list;
+    }
+
+    @RequestMapping(value = "/media/test",  method = RequestMethod.GET, produces="application/json")
+    @ResponseBody
+    public List<DBObject> mediaFromManager() {
+       return mgr.search();
+    }
+
 
     private static final String template = "Hello, %s!";
     private final AtomicLong counter = new AtomicLong();
