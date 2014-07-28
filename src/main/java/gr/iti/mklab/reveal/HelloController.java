@@ -69,10 +69,22 @@ public class HelloController {
     public String collectionsAdd(
             @RequestParam(value = "name", required = true) String name) {
         try {
-            IndexingManager.createIndex(name);
+            IndexingManager.getInstance().createIndex(name);
             return "success";
         }catch(Exception ex){
             return ex.getMessage();
+        }
+    }
+
+    @RequestMapping(value = "/media/image/index", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public String indexImage(
+            @RequestParam(value = "folder", required = false) String folder,
+            @RequestParam(value = "name", required = true) String filename) {
+        try {
+            return String.valueOf(IndexingManager.getInstance().indexImage("/home/kandreadou/Pictures/asdf/",filename));
+        } catch (Exception e) {
+            return e.getMessage();
         }
     }
 
