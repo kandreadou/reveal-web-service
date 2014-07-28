@@ -20,9 +20,9 @@ import java.util.Map;
  */
 public class IndexingManager {
 
+    protected static String DEFAULT_COLLECTION_NAME="WHITE_HORSE";
     protected static int maxNumPixels = 768 * 512;
     protected static int targetLengthMax = 1024;
-    protected static IVFPQ index;
     protected static PCA pca;
     protected static String learningFolder = "/home/kandreadou/webservice/learning_files/";
     private static Map<String, AbstractSearchStructure> indices = new HashMap<String, AbstractSearchStructure>();
@@ -81,7 +81,7 @@ public class IndexingManager {
         String coarseQuantizerFile2 = learningFolder + "qcoarse_1024d_8192k.csv";
         String productQuantizerFile2 = learningFolder + "pq_1024_64x8_rp_ivf_8192k.csv";
 
-        index = new IVFPQ(targetLengthMax, maximumNumVectors, false, ivfpqIndexFolder, m2, k_c, PQ.TransformationType.RandomPermutation, numCoarseCentroids, true, 0);
+        IVFPQ index = new IVFPQ(targetLengthMax, maximumNumVectors, false, ivfpqIndexFolder, m2, k_c, PQ.TransformationType.RandomPermutation, numCoarseCentroids, true, 0);
         index.loadCoarseQuantizer(coarseQuantizerFile2);
         index.loadProductQuantizer(productQuantizerFile2);
         int w = 64; // larger values will improve results/increase seach time
@@ -92,10 +92,17 @@ public class IndexingManager {
         }
     }
 
-    public boolean indexImage(String imageFolder, String imageFilename) throws Exception {
+    public boolean indexImage(String imageFolder, String imageFilename, String collection) throws Exception {
 
+        if(collection==null){
+            collection = DEFAULT_COLLECTION_NAME;
+        }
+        AbstractSearchStructure index = indices.get(collection);
+        if(index==null){
+            createIndex(collection);
+            index = indices.get(collection);
+        }
         ImageVectorization imvec = new ImageVectorization(imageFolder, imageFilename, targetLengthMax, maxNumPixels);
-
         ImageVectorizationResult imvr = imvec.call();
         double[] vector = imvr.getImageVector();
         return index.indexVector(imageFilename, vector);

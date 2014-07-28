@@ -82,7 +82,7 @@ public class HelloController {
             @RequestParam(value = "folder", required = false) String folder,
             @RequestParam(value = "name", required = true) String filename) {
         try {
-            return String.valueOf(IndexingManager.getInstance().indexImage("/home/kandreadou/Pictures/asdf/",filename));
+            return String.valueOf(IndexingManager.getInstance().indexImage("/home/kandreadou/Pictures/asdf/",filename, null));
         } catch (Exception e) {
             return e.getMessage();
         }
