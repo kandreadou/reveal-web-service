@@ -11,7 +11,10 @@ import gr.iti.mklab.visual.extraction.SURFExtractor;
 import gr.iti.mklab.visual.vectorization.ImageVectorization;
 import gr.iti.mklab.visual.vectorization.ImageVectorizationResult;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +23,7 @@ import java.util.Map;
  */
 public class IndexingManager {
 
-    protected static String DEFAULT_COLLECTION_NAME="WHITE_HORSE";
+    protected static String DEFAULT_COLLECTION_NAME = "WHITE_HORSE";
     protected static int maxNumPixels = 768 * 512;
     protected static int targetLengthMax = 1024;
     protected static PCA pca;
@@ -28,8 +31,8 @@ public class IndexingManager {
     private static Map<String, AbstractSearchStructure> indices = new HashMap<String, AbstractSearchStructure>();
     private static IndexingManager singletonInstance;
 
-    public synchronized static IndexingManager getInstance(){
-        if(singletonInstance==null){
+    public synchronized static IndexingManager getInstance() {
+        if (singletonInstance == null) {
             singletonInstance = new IndexingManager();
         }
         return singletonInstance;
@@ -62,13 +65,13 @@ public class IndexingManager {
                 pca.loadPCAFromFile(pcaFile);
                 ImageVectorization.setPcaProjector(pca);
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             //TODO: do something
         }
     }
 
     public void createIndex(String name) throws Exception {
-        String ivfpqIndexFolder = learningFolder + name + "_" + targetLengthMax;
+        String ivfpqIndexFolder = "/home/kandreadou/webservice/reveal_indices/" + name + "_" + targetLengthMax;
         File jeLck = new File(ivfpqIndexFolder, "je.lck");
         if (jeLck.exists()) {
             jeLck.delete();
@@ -94,11 +97,11 @@ public class IndexingManager {
 
     public boolean indexImage(String imageFolder, String imageFilename, String collection) throws Exception {
 
-        if(collection==null){
+        if (collection == null) {
             collection = DEFAULT_COLLECTION_NAME;
         }
         AbstractSearchStructure index = indices.get(collection);
-        if(index==null){
+        if (index == null) {
             createIndex(collection);
             index = indices.get(collection);
         }
@@ -106,5 +109,43 @@ public class IndexingManager {
         ImageVectorizationResult imvr = imvec.call();
         double[] vector = imvr.getImageVector();
         return index.indexVector(imageFilename, vector);
+    }
+
+    public boolean indexImage(String url, String collection) throws Exception {
+        if (collection == null) {
+            collection = DEFAULT_COLLECTION_NAME;
+        }
+        AbstractSearchStructure index = indices.get(collection);
+        if (index == null) {
+            createIndex(collection);
+            index = indices.get(collection);
+        }
+        BufferedImage img = ImageIO.read(new URL(url));
+        ImageVectorization imvec = new ImageVectorization(url, img, targetLengthMax, maxNumPixels);
+        ImageVectorizationResult imvr = imvec.call();
+        double[] vector = imvr.getImageVector();
+        return index.indexVector(url, vector);
+    }
+
+    public String statistics(String collection) {
+
+        String response = null;
+
+        if (collection != null && indices.containsKey(collection)) {
+            System.out.println("Collection " + collection + " found");
+            AbstractSearchStructure index = indices.get(collection);
+            int ivfpqIndexCount = index.getLoadCounter();
+            System.out.println("Load counter " + ivfpqIndexCount);
+            response = collection + ivfpqIndexCount;
+            System.out.println(response);
+        } else {
+            for (String collectionName : indices.keySet()) {
+                AbstractSearchStructure index = indices.get(collectionName);
+                int ivfpqIndexCount = index.getLoadCounter();
+                response = collection + ivfpqIndexCount;
+            }
+            System.out.println(response);
+        }
+        return response;
     }
 }

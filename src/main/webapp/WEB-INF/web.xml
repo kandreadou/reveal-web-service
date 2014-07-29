@@ -15,4 +15,10 @@
 		<servlet-name>mvc-dispatcher</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
+
+    <context-param>
+        <param-name>learningFolder</param-name>
+        <param-value>/home/iti-310/VisualIndex/learning_files/</param-value>
+    </context-param>
+
 </web-app>
