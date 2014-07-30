@@ -24,17 +24,23 @@
             <version>${spring.version}</version>
         </dependency>
 
+        <!-- Servlet -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>javax.servlet.jsp</groupId>
             <artifactId>jsp-api</artifactId>
             <version>2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
             <scope>provided</scope>
         </dependency>
 
@@ -80,6 +86,11 @@
             <version>5.6.7</version>
         </dependency>
         <dependency>
+            <groupId>eu.socialsensor</groupId>
+            <artifactId>socialsensor-framework-common</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.sleepycat</groupId>
             <artifactId>je</artifactId>
             <version>5.0.73</version>
@@ -100,6 +111,7 @@
             <version>3.7.10</version>
         </dependency>
 
+
     </dependencies>
 
     <build>
@@ -108,8 +120,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             <plugin>
