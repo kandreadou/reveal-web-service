@@ -119,18 +119,24 @@ public class RevealController {
 
     @RequestMapping(value = "/media/post/index", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     @ResponseBody
-    public String indexWithPost(
-            @RequestParam(value = "collection", required = true) String collection, @RequestBody IndexingRequest request) {
-        try {
-            logger.error("test");
-            logger.error(request.getCollection());
-            for(String url:request.getUrls()){
-                logger.error(url);
+    public IndexingResult indexWithPost(
+            @RequestBody IndexingRequest request) {
+
+        String msg = null;
+        for (String url : request.getUrls()) {
+            try {
+                logger.debug("Indexing image " + url);
+                IndexingManager.getInstance().indexImage(url, request.collection);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                msg += "Error indexing " + url + " " + e.getMessage();
             }
-            return "test";
-        } catch (Exception e) {
-            return e.getMessage();
+            logger.error(url);
         }
+        if (msg == null)
+            return new IndexingResult();
+        else
+            return new IndexingResult(false, msg);
     }
 
     /*@RequestMapping(value = "/media/test", method = RequestMethod.GET, produces = "application/json")

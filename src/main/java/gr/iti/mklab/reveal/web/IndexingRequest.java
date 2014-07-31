@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import eu.socialsensor.framework.common.domain.JSONable;
 
 import java.io.Serializable;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,10 +58,10 @@ public class IndexingRequest implements JSONable, Serializable {
         return gson.toJson(this);
     }
 
-    public static void main(String[] args){
-        IndexingRequest request = new IndexingRequest("hoho");
-        request.addUrl("hihi");
-        request.addUrl("haha");
+    public static void main(String[] args) throws Exception{
+        IndexingRequest request = new IndexingRequest("MyNewCollection");
+        request.addUrl("http://static4.businessinsider.com/image/5326130f69bedd780c549606-1200-924/putin-68.jpg");
+        request.addUrl("http://www.trbimg.com/img-531a4ce6/turbine/topic-peplt007593");
         System.out.println(request.toJSONString());
     }
 }
