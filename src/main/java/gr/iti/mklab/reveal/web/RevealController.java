@@ -38,13 +38,29 @@ public class RevealController {
     }
 
 
+    /**
+     * Returns by default the last 10 media items or the number specified by count
+     *
+     * Example: http://localhost:8090/reveal/mmapi/media?count=20
+     *
+     * @param num
+     * @return
+     */
     @RequestMapping(value = "/media", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    public List<MediaItem> mediaItems(@RequestParam(value = "name", required = false, defaultValue = "World") String name) {
-        List<MediaItem> list = mediaDao.getLastMediaItems(10);
+    public List<MediaItem> mediaItems(@RequestParam(value = "count", required = false, defaultValue = "10") int num) {
+        List<MediaItem> list = mediaDao.getLastMediaItems(num);
         return list;
     }
 
+    /**
+     * Returns the image with the specified id
+     *
+     * Example: http://localhost:8090/reveal/mmapi/media/image/6f1d874534e126dcf9296c9b050cef23
+     *
+     * @param mediaItemId
+     * @return
+     */
     @RequestMapping(value = "/media/image/{id}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public MediaItem mediaItemById(@PathVariable("id") String mediaItemId) {
@@ -60,6 +76,14 @@ public class RevealController {
         return list;
     }
 
+    /**
+     * Adds a collection with the specified name
+     *
+     * Example: http://localhost:8090/reveal/mmapi/collections/add?name=revealsample
+     *
+     * @param name
+     * @return
+     */
     @RequestMapping(value = "/collections/add", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public IndexingResult collectionsAdd(
