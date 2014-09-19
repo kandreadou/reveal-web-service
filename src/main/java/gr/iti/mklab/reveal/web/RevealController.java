@@ -3,6 +3,7 @@ package gr.iti.mklab.reveal.web;
 import eu.socialsensor.framework.client.dao.MediaItemDAO;
 import eu.socialsensor.framework.client.dao.impl.MediaItemDAOImpl;
 import eu.socialsensor.framework.common.domain.MediaItem;
+import gr.iti.mklab.reveal.mongo.RevealMediaItemDaoImpl;
 import gr.iti.mklab.reveal.visual.IndexingManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -21,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RevealController {
 
 
-    protected MediaItemDAO mediaDao;
+    protected RevealMediaItemDaoImpl mediaDao;
 
     private static final Logger logger = LoggerFactory.getLogger(RevealController.class);
 
@@ -31,7 +33,7 @@ public class RevealController {
         String mongoHost = "127.0.0.1";
 
         try {
-            mediaDao = new MediaItemDAOImpl(mongoHost);
+            mediaDao = new RevealMediaItemDaoImpl(mongoHost);
         } catch (Exception ex) {
             //ignore
         }
@@ -40,7 +42,7 @@ public class RevealController {
 
     /**
      * Returns by default the last 10 media items or the number specified by count
-     *
+     * <p/>
      * Example: http://localhost:8090/reveal/mmapi/media?count=20
      *
      * @param num
@@ -55,7 +57,7 @@ public class RevealController {
 
     /**
      * Returns the image with the specified id
-     *
+     * <p/>
      * Example: http://localhost:8090/reveal/mmapi/media/image/6f1d874534e126dcf9296c9b050cef23
      *
      * @param mediaItemId
@@ -68,17 +70,43 @@ public class RevealController {
         return mi;
     }
 
+    /**
+     * Searches for images with publicationTime, width and height GREATER than the provided values
+     * Example: http://localhost:8090/reveal/mmapi/media/image/search?h=1000&w=2000
+     *
+     * @param date
+     * @param w
+     * @param h
+     * @param indexed
+     * @return
+     */
     @RequestMapping(value = "/media/image/search", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public List<MediaItem> mediaItemsSearch(
-            @RequestParam(value = "date", required = false) long date) {
-        List<MediaItem> list = mediaDao.getLastMediaItems(50);
+            @RequestParam(value = "date", required = false) Long date,
+            @RequestParam(value = "w", required = false) Long w,
+            @RequestParam(value = "h", required = false) Long h,
+            @RequestParam(value = "indexed", required = false) Boolean indexed) {
+
+        if (date == null) {
+            date = new Date(0).getTime();
+        }
+        if (w == null) {
+            w = Long.valueOf(0);
+        }
+        if (h == null) {
+            h = Long.valueOf(0);
+        }
+        if (indexed == null) {
+            indexed = false;
+        }
+        List<MediaItem> list = mediaDao.search(date, w, h, indexed);
         return list;
     }
 
     /**
      * Adds a collection with the specified name
-     *
+     * <p/>
      * Example: http://localhost:8090/reveal/mmapi/collections/add?name=revealsample
      *
      * @param name
@@ -120,6 +148,15 @@ public class RevealController {
         }
     }*/
 
+    /**
+     * Indexes the image in the specified url
+     * <p/>
+     * http://localhost:8090/reveal/mmapi/media/revealsample_1024/index?imageurl=http%3A%2F%2Fww2.hdnux.com%2Fphotos%2F31%2F11%2F13%2F6591221%2F3%2F628x471.jpg
+     *
+     * @param collectionName
+     * @param imageurl
+     * @return
+     */
     @RequestMapping(value = "/media/{collection}/index", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public String indexImageFromUrl(@PathVariable("collection") String collectionName,
@@ -131,7 +168,15 @@ public class RevealController {
         }
     }
 
-    @RequestMapping(value = "/media/{collection}/statistics", method = RequestMethod.GET, produces = "application/json")
+    /**
+     * Gets statistics for the given collection
+     * <p/>
+     * Example: http://localhost:8090/reveal/mmapi/collections/revealsample_1024/statistics
+     *
+     * @param collectionName
+     * @return
+     */
+    @RequestMapping(value = "/collections/{collection}/statistics", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public String getStatistics(@PathVariable("collection") String collectionName) {
         try {
