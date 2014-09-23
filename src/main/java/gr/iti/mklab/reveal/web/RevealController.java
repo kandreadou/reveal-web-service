@@ -5,6 +5,8 @@ import eu.socialsensor.framework.client.dao.impl.MediaItemDAOImpl;
 import eu.socialsensor.framework.common.domain.MediaItem;
 import gr.iti.mklab.reveal.mongo.RevealMediaItemDaoImpl;
 import gr.iti.mklab.reveal.visual.IndexingManager;
+import gr.iti.mklab.visual.utilities.Answer;
+import gr.iti.mklab.visual.utilities.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -186,7 +188,17 @@ public class RevealController {
         }
     }
 
-    @RequestMapping(value = "/media/post/index", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+
+    /**
+     * Sends a post request
+     * Example: http://localhost:8090/reveal/mmapi/media/post/index
+     * Content-type: application/json
+     * Content-body: {"collection":"WTFCollection","urls":["http://static4.businessinsider.com/image/5326130f69bedd780c549606-1200-924/putin-68.jpg","http://www.trbimg.com/img-531a4ce6/turbine/topic-peplt007593"]}
+     *
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/media/image/index", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     @ResponseBody
     public IndexingResult indexWithPost(
             @RequestBody IndexingRequest request) {
@@ -206,6 +218,23 @@ public class RevealController {
             return new IndexingResult();
         else
             return new IndexingResult(false, msg);
+    }
+
+
+    @RequestMapping(value = "/media/image/similar", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public List<MediaItem> findSimilarImages(@RequestParam(value = "collection", required=false) String collectionName,
+                                    @RequestParam(value = "imageurl", required = true) String imageurl) {
+        try {
+            Answer answer = IndexingManager.getInstance().findSimilar(imageurl, collectionName, 10);
+            List<MediaItem> items = new ArrayList<MediaItem>();
+            for (Result r: answer.getResults()){
+               items.add(mediaDao.getMediaItem(r.getId()));
+            }
+            return items;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /*@RequestMapping(value = "/media/test", method = RequestMethod.GET, produces = "application/json")

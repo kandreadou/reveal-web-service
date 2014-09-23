@@ -93,7 +93,7 @@
         <dependency>
             <groupId>com.sleepycat</groupId>
             <artifactId>je</artifactId>
-            <version>5.0.73</version>
+            <version>5.0.58</version>
         </dependency>
         <dependency>
             <groupId>net.sf.trove4j</groupId>
@@ -110,7 +110,11 @@
             <artifactId>weka-dev</artifactId>
             <version>3.7.10</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.aliasi</groupId>
+            <artifactId>lingpipe</artifactId>
+            <version>4.0.1</version>
+        </dependency>
 
     </dependencies>
 

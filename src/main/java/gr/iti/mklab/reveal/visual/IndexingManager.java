@@ -8,6 +8,7 @@ import gr.iti.mklab.visual.datastructures.PQ;
 import gr.iti.mklab.visual.dimreduction.PCA;
 import gr.iti.mklab.visual.extraction.AbstractFeatureExtractor;
 import gr.iti.mklab.visual.extraction.SURFExtractor;
+import gr.iti.mklab.visual.utilities.Answer;
 import gr.iti.mklab.visual.vectorization.ImageVectorization;
 import gr.iti.mklab.visual.vectorization.ImageVectorizationResult;
 
@@ -126,6 +127,23 @@ public class IndexingManager {
         double[] vector = imvr.getImageVector();
         return index.indexVector(url, vector);
     }
+
+    public Answer findSimilar(String url, String collection, int neighbours) throws Exception {
+        if (collection == null) {
+            collection = DEFAULT_COLLECTION_NAME;
+        }
+        AbstractSearchStructure index = indices.get(collection);
+        if (index == null) {
+            createIndex(collection);
+            index = indices.get(collection);
+        }
+        BufferedImage img = ImageIO.read(new URL(url));
+        ImageVectorization imvec = new ImageVectorization(url, img, targetLengthMax, maxNumPixels);
+        ImageVectorizationResult imvr = imvec.call();
+        double[] vector = imvr.getImageVector();
+        return index.computeNearestNeighbors(neighbours, vector);
+    }
+
 
     public String statistics(String collection) {
 
