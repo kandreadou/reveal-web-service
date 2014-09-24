@@ -1,5 +1,7 @@
 package gr.iti.mklab.reveal.visual;
 
+import com.google.common.base.Strings;
+import gr.iti.mklab.visual.aggregation.AbstractFeatureAggregator;
 import gr.iti.mklab.visual.aggregation.VladAggregatorMultipleVocabularies;
 import gr.iti.mklab.visual.datastructures.AbstractSearchStructure;
 import gr.iti.mklab.visual.datastructures.IVFPQ;
@@ -11,6 +13,7 @@ import gr.iti.mklab.visual.extraction.SURFExtractor;
 import gr.iti.mklab.visual.utilities.Answer;
 import gr.iti.mklab.visual.vectorization.ImageVectorization;
 import gr.iti.mklab.visual.vectorization.ImageVectorizationResult;
+import org.apache.commons.lang.StringUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -24,11 +27,12 @@ import java.util.Map;
  */
 public class IndexingManager {
 
-    protected static String DEFAULT_COLLECTION_NAME = "WHITE_HORSE";
+    protected static String DEFAULT_COLLECTION_NAME = "theSnow";
     protected static int maxNumPixels = 768 * 512;
     protected static int targetLengthMax = 1024;
     protected static PCA pca;
-    protected static String learningFolder = "/home/kandreadou/webservice/learning_files/";
+    //protected static String learningFolder = "/home/kandreadou/webservice/learning_files/";
+    protected static String learningFolder = "/home/iti-310/VisualIndex/learning_files/";
     private static Map<String, AbstractSearchStructure> indices = new HashMap<String, AbstractSearchStructure>();
     private static IndexingManager singletonInstance;
 
@@ -58,8 +62,9 @@ public class IndexingManager {
             //int existingVectors = visualIndex.getLoadCounter();
             SURFExtractor extractor = new SURFExtractor();
             ImageVectorization.setFeatureExtractor(extractor);
-            ImageVectorization.setVladAggregator(new VladAggregatorMultipleVocabularies(codebookFiles,
-                    numCentroids, AbstractFeatureExtractor.SURFLength));
+            double[][][] codebooks = AbstractFeatureAggregator.readQuantizers(codebookFiles, numCentroids,
+                    AbstractFeatureExtractor.SURFLength);
+            ImageVectorization.setVladAggregator(new VladAggregatorMultipleVocabularies(codebooks));
             if (targetLengthMax < initialLength) {
                 System.out.println("targetLengthMax : " + targetLengthMax + " initialLengh " + initialLength);
                 pca = new PCA(targetLengthMax, 1, initialLength, true);
@@ -72,13 +77,14 @@ public class IndexingManager {
     }
 
     public void createIndex(String name) throws Exception {
-        String ivfpqIndexFolder = "/home/kandreadou/webservice/reveal_indices/" + name + "_" + targetLengthMax;
+        //String ivfpqIndexFolder = "/home/kandreadou/webservice/reveal_indices/" + name + "_" + targetLengthMax;
+        String ivfpqIndexFolder = "/home/iti-310/VisualIndex/data/"+name+"/ivfpq";
         File jeLck = new File(ivfpqIndexFolder, "je.lck");
         if (jeLck.exists()) {
             jeLck.delete();
         }
 
-        int maximumNumVectors = 1000;
+        int maximumNumVectors = 100000;
         int m2 = 64;
         int k_c = 256;
         int numCoarseCentroids = 8192;
@@ -98,7 +104,7 @@ public class IndexingManager {
 
     public boolean indexImage(String imageFolder, String imageFilename, String collection) throws Exception {
 
-        if (collection == null) {
+        if (Strings.isNullOrEmpty(collection)) {
             collection = DEFAULT_COLLECTION_NAME;
         }
         AbstractSearchStructure index = indices.get(collection);
@@ -113,7 +119,7 @@ public class IndexingManager {
     }
 
     public boolean indexImage(String url, String collection) throws Exception {
-        if (collection == null) {
+        if (Strings.isNullOrEmpty(collection)) {
             collection = DEFAULT_COLLECTION_NAME;
         }
         AbstractSearchStructure index = indices.get(collection);
@@ -129,7 +135,7 @@ public class IndexingManager {
     }
 
     public Answer findSimilar(String url, String collection, int neighbours) throws Exception {
-        if (collection == null) {
+        if (Strings.isNullOrEmpty(collection)) {
             collection = DEFAULT_COLLECTION_NAME;
         }
         AbstractSearchStructure index = indices.get(collection);

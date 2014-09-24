@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Controller
-@RequestMapping("reveal/mmapi")
+@RequestMapping("/mmapi")
 public class RevealController {
 
 
@@ -35,7 +35,7 @@ public class RevealController {
         String mongoHost = "127.0.0.1";
 
         try {
-            mediaDao = new RevealMediaItemDaoImpl(mongoHost);
+            mediaDao = new RevealMediaItemDaoImpl(mongoHost, "Prototype", "MediaItems");
         } catch (Exception ex) {
             //ignore
         }
@@ -191,7 +191,7 @@ public class RevealController {
 
     /**
      * Sends a post request
-     * Example: http://localhost:8090/reveal/mmapi/media/post/index
+     * Example: http://localhost:8090/reveal/mmapi/media/image/index
      * Content-type: application/json
      * Content-body: {"collection":"WTFCollection","urls":["http://static4.businessinsider.com/image/5326130f69bedd780c549606-1200-924/putin-68.jpg","http://www.trbimg.com/img-531a4ce6/turbine/topic-peplt007593"]}
      *
@@ -229,7 +229,7 @@ public class RevealController {
             Answer answer = IndexingManager.getInstance().findSimilar(imageurl, collectionName, 10);
             List<MediaItem> items = new ArrayList<MediaItem>();
             for (Result r: answer.getResults()){
-               items.add(mediaDao.getMediaItem(r.getId()));
+               items.add(mediaDao.getMediaItem(r.getExternalId()));
             }
             return items;
         } catch (Exception e) {

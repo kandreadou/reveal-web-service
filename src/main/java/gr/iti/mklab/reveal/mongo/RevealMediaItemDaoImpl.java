@@ -18,8 +18,8 @@ public class RevealMediaItemDaoImpl extends MediaItemDAOImpl {
 
     private MongoHandler mongoHandler;
 
-    public RevealMediaItemDaoImpl(String mongohost) throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException {
-        super(mongohost);
+    public RevealMediaItemDaoImpl(String mongohost, String db, String collection) throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException {
+        super(mongohost, db, collection);
 
         // Get private mongoHandler field with Reflection
         // This is a temporary solution til the SIMMO framework is ready
@@ -42,7 +42,7 @@ public class RevealMediaItemDaoImpl extends MediaItemDAOImpl {
         query.selectGreaterThan("height", height);
         query.select("indexed", indexed);
         List<String> results = mongoHandler.findMany(query, 10);
-        List<MediaItem> mediaItems = new ArrayList<>(results.size());
+        List<MediaItem> mediaItems = new ArrayList<MediaItem>(results.size());
         for (String json : results) {
             mediaItems.add(ItemFactory.createMediaItem(json));
         }
